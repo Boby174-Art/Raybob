@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Fisio: Manajemen Rekam Medis & Jadwal Fisioterapi</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-gradient {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .accent-gradient {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+
+  <!-- HEADER / NAVIGATION BAR -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="pindahHalaman('beranda')">
+          <div class="w-10 h-10 accent-gradient text-white flex items-center justify-center rounded-xl shadow-md">
+            <i class="fa-solid fa-heart-pulse text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold text-slate-900 tracking-tight">E-Fisio</span>
+            <span class="block text-xs font-semibold text-sky-600 -mt-1">Sistem Rekam Medis</span>
+          </div>
+        </div>
+        
+        <!-- Navigation Link -->
+        <nav class="flex items-center space-x-2">
+          <button onclick="pindahHalaman('beranda')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-slate-50 transition-all duration-200">
+            <i class="fa-solid fa-house mr-1.5"></i> Beranda
+          </button>
+          <button onclick="pindahHalaman('cek-pasien')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-slate-50 transition-all duration-200">
+            <i class="fa-solid fa-user-injured mr-1.5"></i> Cek Pasien
+          </button>
+          <button id="btn-login-menu" onclick="pindahHalaman('login')" class="px-4 py-2 rounded-lg text-sm font-semibold text-white accent-gradient hover:opacity-95 shadow-sm transition-all duration-200">
+            <i class="fa-solid fa-sign-in-alt mr-1.5"></i> Login Staf
+          </button>
+          <!-- Logged-in badge & Logout -->
+          <div id="status-login" class="hidden flex items-center space-x-3">
+            <span id="label-role" class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold shadow-sm">Role</span>
+            <button onclick="handleLogout()" class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-all duration-200">
+              <i class="fa-solid fa-power-off mr-1"></i> Logout
+            </button>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- LOADING SPINNER GLOBAL -->
+  <div id="global-loading" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col justify-center items-center text-white">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-sky-400 mb-4"></div>
+    <p class="font-semibold text-lg tracking-wide animate-pulse" id="loading-text">Sedang memproses data...</p>
+  </div>
+
+  <!-- MAIN CONTAINER FOR VIEWS -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ===================================== -->
+    <!-- VIEW 1: BERANDA UTAMA (PUBLIC)        -->
+    <!-- ===================================== -->
+    <section id="view-beranda" class="space-y-12">
+      <!-- Hero Section -->
+      <div class="custom-gradient text-white rounded-3xl p-8 sm:p-12 shadow-xl relative overflow-hidden">
+        <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+          <i class="fa-solid fa-stethoscope text-[300px]"></i>
+        </div>
+        <div class="max-w-2xl space-y-6 relative z-10">
+          <span class="px-4 py-1.5 bg-sky-500/20 text-sky-300 rounded-full text-xs font-bold tracking-wider uppercase">Layanan Fisioterapi Terpercaya</span>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+            Pemulihan Fisik <br><span class="text-sky-400">Optimal & Terukur</span>
+          </h1>
+          <p class="text-slate-300 leading-relaxed text-sm sm:text-base" id="text-deskripsi">
+            Memuat deskripsi sistem...
+          </p>
+          <div class="flex flex-wrap gap-4 pt-2">
+            <button onclick="pindahHalaman('cek-pasien')" class="px-6 py-3 bg-sky-500 text-white rounded-xl font-bold hover:bg-sky-400 shadow-lg shadow-sky-500/20 transition duration-200">
+              <i class="fa-solid fa-magnifying-glass mr-2"></i> Cek Status Terapi Pasien
+            </button>
+            <a href="#" id="link-wa-beranda" target="_blank" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 transition duration-200 flex items-center">
+              <i class="fa-brands fa-whatsapp mr-2 text-lg"></i> Hubungi WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terapis & Klinik Info Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Informasi Terapis -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
+              <i class="fa-solid fa-user-doctor text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Fisioterapis Utama</h3>
+              <p class="text-xl font-extrabold text-slate-900 mt-1" id="val-nama-terapis">Nama Terapis</p>
+              <p class="text-xs text-slate-500 font-semibold mt-1">Spesialisasi Rehabilitasi Fisik & Muskuloskeletal</p>
+            </div>
+            <p class="text-slate-600 text-sm leading-relaxed" id="text-informasi">
+              Memuat informasi operasional klinik...
+            </p>
+          </div>
+          <div class="border-t border-slate-100 pt-4 mt-6">
+            <div class="flex items-center space-x-3 text-sm text-slate-600">
+              <i class="fa-solid fa-phone text-emerald-500"></i>
+              <span id="val-kontak-wa">Nomor Kontak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lokasi Peta Integrasi -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-2 flex flex-col space-y-4">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+                <i class="fa-solid fa-location-dot text-lg"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-900">Lokasi Praktik</h4>
+                <p class="text-xs text-slate-500">Temukan lokasi terdekat untuk sesi terapi tatap muka</p>
+              </div>
+            </div>
+            <a href="#" id="link-maps-btn" target="_blank" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition">
+              Buka Google Maps <i class="fa-solid fa-external-link ml-1"></i>
+            </a>
+          </div>
+          <!-- Embed maps representatif menggunakan iframe, digantikan tautan asli -->
+          <div class="bg-slate-100 rounded-xl h-48 flex items-center justify-center relative overflow-hidden border border-slate-200">
+            <div class="text-center p-4 space-y-2 z-10">
+              <i class="fa-solid fa-map-marked-alt text-4xl text-slate-400"></i>
+              <p class="font-semibold text-slate-700 text-sm">Peta Interaktif Fisioterapi</p>
+              <p class="text-xs text-slate-500">Klik tombol di atas untuk melihat detail rute pada Google Maps</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================== -->
+    <!-- VIEW 2: CEK PASIEN (PUBLIC NO-LOGIN)  -->
+    <!-- ===================================== -->
+    <section id="view-cek-pasien" class="hidden max-w-3xl mx-auto space-y-8">
+      <div class="text-center space-y-2">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">Cek Status & Rekam Medis Pasien</h2>
+        <p class="text-slate-500 text-sm">Masukkan ID Pasien Anda untuk melihat riwayat medis dan jadwal terapi berikutnya.</p>
+      </div>
+
+      <!-- Form ID Input -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border border-slate-100">
+        <form onsubmit="handleCekPasien(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">ID Pasien Anda</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa-solid fa-id-card text-slate-400"></i>
+              </div>
+              <input type="text" id="input-id-pasien" required placeholder="Contoh: PS001" class="pl-10 block w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:border-sky-500 focus:bg-white focus:ring-1 focus:ring-sky-500 text-slate-900 font-semibold uppercase tracking-wider">
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3 px-4 bg-sky-600 text-white rounded-xl font-bold hover:bg-sky-500 shadow-md shadow-sky-600/10 transition">
+            <i class="fa-solid fa-search mr-1.5"></i> Tampilkan Informasi Medis
+          </button>
+        </form>
+      </div>
+
+      <!-- Detail Hasil Pencarian Pasien (Hidden by Default) -->
+      <div id="hasil-cek-pasien" class="hidden space-y-8">
+        <!-- Profil Ringkas Pasien -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-100 pb-4">
+            <div>
+              <span class="text-xs font-bold text-sky-600 uppercase tracking-widest" id="res-id-pasien">PS001</span>
+              <h3 class="text-xl font-extrabold text-slate-900 mt-0.5" id="res-nama-pasien">Nama Lengkap Pasien</h3>
+            </div>
+            <div class="flex space-x-2">
+              <span id="res-admin-badge" class="px-3 py-1 bg-sky-50 text-sky-700 rounded-full text-xs font-bold border border-sky-100">BPJS</span>
+              <span id="res-status-badge" class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100">Aktif</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span class="block text-xs font-semibold text-slate-400">Gol. Darah</span>
+              <span class="font-bold text-slate-800" id="res-goldar">-</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold text-slate-400">Gender</span>
+              <span class="font-bold text-slate-800" id="res-jk">-</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold text-slate-400">Pekerjaan</span>
+              <span class="font-bold text-slate-800 truncate block" id="res-pekerjaan">-</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold text-slate-400">No. WA</span>
+              <span class="font-bold text-slate-800" id="res-wa">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sektor Jadwal Fisioterapi Berikutnya -->
+        <div class="bg-gradient-to-r from-sky-50 to-indigo-50 rounded-2xl p-6 border border-sky-100/50 space-y-4 shadow-sm">
+          <div class="flex items-center space-x-3 text-sky-800">
+            <i class="fa-solid fa-calendar-check text-xl"></i>
+            <h4 class="font-extrabold text-lg">Jadwal Terapi Berikutnya</h4>
+          </div>
+          
+          <div id="box-jadwal-aktif" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-sky-100">
+                <span class="block text-xs font-semibold text-slate-500">Hari & Tanggal</span>
+                <span class="text-base font-bold text-slate-800" id="res-tgl-terapi">25 Juni 2026</span>
+              </div>
+              <div class="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-sky-100">
+                <span class="block text-xs font-semibold text-slate-500">Jam Terapi</span>
+                <span class="text-base font-bold text-slate-800" id="res-jam-terapi">10:00 WIB</span>
+              </div>
+            </div>
+
+            <!-- Panel Status Jadwal & Pengajuan Ganti Tanggal -->
+            <div class="bg-white/60 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <span class="block text-xs font-semibold text-slate-500">Status Penjadwalan</span>
+                <span id="res-status-jadwal" class="inline-block mt-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-xs font-bold">Status</span>
+              </div>
+              <button id="btn-show-reschedule" onclick="toggleFormReschedule(true)" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition shadow-sm">
+                <i class="fa-solid fa-calendar-plus mr-1"></i> Ajukan Ganti Jadwal
+              </button>
+            </div>
+            
+            <!-- Formulir Ajukan Reschedule (Hidden by default) -->
+            <form id="form-pengajuan-reschedule" onsubmit="handleKirimReschedule(event)" class="hidden bg-white p-4 rounded-xl border border-sky-200 space-y-4">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h5 class="text-sm font-bold text-slate-800"><i class="fa-solid fa-calendar-day mr-1 text-sky-500"></i> Form Usul Jadwal Baru</h5>
+                <button type="button" onclick="toggleFormReschedule(false)" class="text-xs font-semibold text-slate-400 hover:text-slate-600">Batal</button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Usulan Baru</label>
+                  <input type="date" id="input-usulan-tgl" required class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm p-2 text-slate-950 font-medium">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Jam Usulan Baru</label>
+                  <input type="time" id="input-usulan-jam" required class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm p-2 text-slate-950 font-medium">
+                </div>
+              </div>
+              <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition">
+                <i class="fa-solid fa-paper-plane mr-1"></i> Kirim Pengajuan Perubahan
+              </button>
+            </form>
+          </div>
+          
+          <div id="box-jadwal-kosong" class="hidden text-center py-6 text-slate-500">
+            <i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-slate-300"></i>
+            <p class="text-sm font-medium">Belum ada jadwal sesi terapi baru yang diterbitkan terapis.</p>
+          </div>
+        </div>
+
+        <!-- Rekap Riwayat Medis / Pemeriksaan -->
+        <div class="space-y-4">
+          <h4 class="font-extrabold text-lg text-slate-900 flex items-center space-x-2">
+            <i class="fa-solid fa-file-medical text-sky-600"></i>
+            <span>Rekapan Laporan Rekam Medis</span>
+          </h4>
+          
+          <div id="list-rekam-medis" class="space-y-4">
+            <!-- Dinamis rekam medis ditempel disini -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================================== -->
+    <!-- VIEW 3: FORM LOGIN (ADMIN & TERAPIS)  -->
+    <!-- ===================================== -->
+    <section id="view-login" class="hidden max-w-md mx-auto space-y-6 py-8">
+      <div class="text-center space-y-2">
+        <h2 class="text-2xl font-extrabold text-slate-950">Login Staff E-Fisio</h2>
+        <p class="text-slate-500 text-sm">Masuk untuk mengelola data rekam medis dan administrasi.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-lg border border-slate-100">
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
+            <input type="text" id="login-username" required placeholder="Masukkan username" class="block w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:border-sky-500 focus:bg-white text-slate-900 font-medium">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••" class="block w-full rounded-xl border-slate-200 bg-slate-50 border p-3 focus:border-sky-500 focus:bg-white text-slate-900 font-medium">
+          </div>
+          <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold transition shadow-sm">
+            <i class="fa-solid fa-unlock-keyhole mr-1.5"></i> Masuk Ke Sistem
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================================== -->
+    <!-- VIEW 4: DASBOR ADMIN                  -->
+    <!-- ===================================== -->
+    <section id="view-admin" class="hidden space-y-8">
+      <div class="flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950">Panel Administrasi (Admin)</h2>
+          <p class="text-slate-500 text-sm">Daftarkan pasien, kelola kredensial staff, dan kustomisasi beranda publik.</p>
+        </div>
+      </div>
+
+      <!-- Menu Tab Internal Admin -->
+      <div class="border-b border-gray-200">
+        <nav class="flex space-x-8">
+          <button onclick="setTabAdmin('tambah-pasien')" id="tab-btn-add-pas" class="border-b-2 border-sky-600 py-4 px-1 text-sm font-bold text-sky-600">
+            <i class="fa-solid fa-user-plus mr-1"></i> Tambah Pasien Baru
+          </button>
+          <button onclick="setTabAdmin('kelola-beranda')" id="tab-btn-home-edit" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300">
+            <i class="fa-solid fa-edit mr-1"></i> Atur Beranda Klinik
+          </button>
+          <button onclick="setTabAdmin('tambah-staff')" id="tab-btn-add-staf" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300">
+            <i class="fa-solid fa-user-gear mr-1"></i> Buat Akun Staff
+          </button>
+        </nav>
+      </div>
+
+      <!-- TAB SUB 1: TAMBAH PASIEN -->
+      <div id="sub-admin-tambah-pasien" class="space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4"><i class="fa-solid fa-circle-info mr-1 text-sky-500"></i> Formulir Registrasi Identitas Pasien</h3>
+   
